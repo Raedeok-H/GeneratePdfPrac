@@ -29,7 +29,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     implementation 'com.itextpdf:itext7-core:7.2.1' // iText 의존성 추가
-    implementation 'com.itextpdf:html2pdf:4.0.2'
+    implementation 'com.itextpdf:html2pdf:4.0.2' // html to pdf 변환 의존성 추가
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' // Thymeleaf 의존성 추가
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

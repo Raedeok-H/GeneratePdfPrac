@@ -15,7 +15,10 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.properties.TextAlignment;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,8 +27,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @Service
+@RequiredArgsConstructor
 public class HtmlToPdfService {
     private static final String FONT_PATH = "src/main/resources/fonts/NanumGothic.ttf";
+    private final TemplateEngine templateEngine;
 
     public byte[] convertHtmlToPdf(String htmlFilePath) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -89,6 +94,52 @@ public class HtmlToPdfService {
             tempHtmlPdfDoc2.close(); // 임시 문서 닫기
 
             // 임시 파일 삭제
+            Files.deleteIfExists(Paths.get(tempHtmlToPdfPath));
+
+            // 문서 닫기
+            document.close();
+            pdfDoc.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return outputStream.toByteArray();
+    }
+
+
+    public byte[] convertHtmlToPdfWithTemplate(String templateName, String title, String description, String footerText) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        try {
+            // 1. 템플릿 엔진을 통해 HTML 콘텐츠 생성
+            Context context = new Context();
+            context.setVariable("title", title);
+            context.setVariable("description", description);
+            context.setVariable("footerText", footerText);
+
+            // Thymeleaf를 통해 HTML 문자열 생성
+            String htmlContent = templateEngine.process(templateName, context);
+
+            // 2. HTML을 임시 PDF 파일로 변환
+            String tempHtmlToPdfPath = "tempHtmlToPdf.pdf";
+            try (PdfWriter tempWriter = new PdfWriter(tempHtmlToPdfPath);
+                 PdfDocument tempPdfDoc = new PdfDocument(tempWriter)) {
+                ConverterProperties converterProperties = new ConverterProperties();
+                HtmlConverter.convertToPdf(htmlContent, tempPdfDoc, converterProperties);
+            }
+
+            // 3. 기존 PdfDocument에 HTML 변환된 페이지 추가
+            PdfWriter writer = new PdfWriter(outputStream);
+            PdfDocument pdfDoc = new PdfDocument(writer);
+            Document document = new Document(pdfDoc, PageSize.A4);
+            pdfDoc.setDefaultPageSize(PageSize.A4);
+
+            // 임시 PDF 파일의 모든 페이지를 기존 pdfDoc에 추가
+            PdfDocument tempHtmlPdfDoc = new PdfDocument(new PdfReader(tempHtmlToPdfPath));
+            tempHtmlPdfDoc.copyPagesTo(1, tempHtmlPdfDoc.getNumberOfPages(), pdfDoc);
+            tempHtmlPdfDoc.close(); // 임시 문서 닫기
+
+            // 4. 임시 파일 삭제
             Files.deleteIfExists(Paths.get(tempHtmlToPdfPath));
 
             // 문서 닫기
