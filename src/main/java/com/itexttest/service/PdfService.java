@@ -96,6 +96,59 @@ public class PdfService {
                     .setMarginTop(50); // 상장 내용 중앙 배치
             document.add(date); // 두 번째 페이지에 상장 내용 추가
 
+
+
+            // 세 번째 페이지로 전환
+            document.add(new AreaBreak());
+
+            // 왼쪽 하단이 (0,0) 이고 우측상단이 (595, 842)이다.
+
+            // 왼쪽 하단부터 위로 쓰이는 글씨
+            PdfCanvas canvas1 = new PdfCanvas(pdfDoc.getLastPage());
+            canvas1.beginText()
+                    .setFontAndSize(koreanFont, 12)
+                    .moveText(50, 50)  // 왼쪽 하단 좌표
+                    .setTextMatrix(0, 1, -1, 0, 50, 50)  // 수직 방향 텍스트 설정
+                    .showText("왼쪽 하단에서 위로 쓰이는 텍스트")
+                    .endText();
+
+            // 위에서 아래로 쓰이는 글씨 (왼쪽 하단의 위쪽에 위치)
+            PdfCanvas canvas4 = new PdfCanvas(pdfDoc.getLastPage());
+            canvas4.beginText()
+                    .setFontAndSize(koreanFont, 12)
+                    .moveText(70, 500)  // 왼쪽 상단 좌표
+                    .setTextMatrix(0, -1, 1, 0, 70, 500)  // 위에서 아래로 설정
+                    .showText("위에서 아래로 쓰이는 텍스트")
+                    .endText();
+
+            // 세로로 쓰인 글씨를 중앙에 배치하기 위해 한 글자씩 줄바꿈 추가
+            String verticalText = "세\n로\n로\n\n쓰\n인\n\n글\n씨";
+            Paragraph verticalParagraph = new Paragraph(verticalText)
+                    .setFont(koreanFont)
+                    .setFontSize(16)
+                    .setTextAlignment(com.itextpdf.layout.properties.TextAlignment.CENTER)
+                    .setFixedPosition(PageSize.A4.getWidth() / 2 - 50, 150, 100); // 페이지 중앙으로 위치 설정
+
+            document.add(verticalParagraph);
+
+            // 왼쪽 하단부터 우측 상단 대각선 글씨
+            PdfCanvas canvas2 = new PdfCanvas(pdfDoc.getLastPage());
+            canvas2.beginText()
+                    .setFontAndSize(koreanFont, 12)
+                    .moveText(50, 50)  // 왼쪽 하단 좌표
+                    .setTextMatrix(0.707f, 0.707f, -0.707f, 0.707f, 50, 50)  // 대각선 설정 (45도)
+                    .showText("대각선으로 쓰인 글씨")
+                    .endText();
+
+            // 하단 중간부터 우측 하단으로 쓰인 글씨
+            PdfCanvas canvas3 = new PdfCanvas(pdfDoc.getLastPage());
+            canvas3.beginText()
+                    .setFontAndSize(koreanFont, 12)
+                    .moveText(200, 100)  // 하단 중간 좌표
+                    .setTextMatrix(1, 0, 0, 1, 200, 100)  // 가로로 쓰인 글씨
+                    .showText("하단 중간부터 우측 하단으로 쓰인 글씨")
+                    .endText();
+
             // 문서 닫기
             document.close();
         } catch (Exception e) {
