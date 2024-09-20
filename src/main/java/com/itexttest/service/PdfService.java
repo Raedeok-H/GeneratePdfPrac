@@ -16,6 +16,8 @@ import com.itextpdf.layout.properties.TextAlignment;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @Service
 public class PdfService {
@@ -26,7 +28,8 @@ public class PdfService {
 
     // 이미지 경로 하드코딩 (학습물의 배경 이미지 및 상장 테두리 이미지)
     private static final String IMAGE_PATH = "src/main/resources/image/main.png";
-    private static final String CERTIFICATE_BORDER_IMAGE_PATH = "src/main/resources/image/round.png"; // 상장 테두리
+    private static final String CERTIFICATE_BORDER_IMAGE_PATH = "src/main/resources/image/sample.png"; // 상장 테두리
+    private static final String CERTIFICATE_BORDER_IMAGE_PATH_2 = "src/main/resources/image/round.png"; // 상장 테두리
 
     public byte[] createPdf(String childName) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -148,6 +151,16 @@ public class PdfService {
                     .setTextMatrix(1, 0, 0, 1, 200, 100)  // 가로로 쓰인 글씨
                     .showText("하단 중간부터 우측 하단으로 쓰인 글씨")
                     .endText();
+
+            document.add(new AreaBreak());
+
+            PdfCanvas canvas_test = new PdfCanvas(pdfDoc.getLastPage()); // PdfCanvas로 배경 그리기
+            byte[] imageBytes = Files.readAllBytes(Paths.get(CERTIFICATE_BORDER_IMAGE_PATH_2));
+            ImageData borderImage_test = ImageDataFactory.create(imageBytes);
+
+            canvas_test.addImageWithTransformationMatrix(
+                    borderImage_test,
+                    PageSize.A4.getWidth(), 0, 0, PageSize.A4.getHeight(), 0, 0); // 배경 이미지 추가
 
             // 문서 닫기
             document.close();
